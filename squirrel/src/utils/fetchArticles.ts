@@ -1,4 +1,4 @@
-import {type Output, object, array, number, string, boolean} from 'valibot'
+import {object, optional, nullable, array, number, string, boolean, safeParse} from 'valibot'
 
 const AritcleSchema = object({
     articles: array(object({
@@ -14,23 +14,40 @@ const AritcleSchema = object({
         is_suspending_private: boolean(),
         published_at: string(),
         body_updated_at: string(),
-        source_repo_updated_at: string(),
-        piined: boolean(),
+        source_repo_updated_at: nullable(string()),
+        pinned: boolean(),
+        path: string(),
         user: object({
             id: number(),
             username: string(),
             name: string(),
-            avarar_small_url: string()
+            avarar_small_url: optional(string())
         }),
-        publication: string()
+        publication: nullable(object({
+            id: number(),
+            avatar_registered: boolean(),
+            avatar_small_url: string(),
+            display_name: string(),
+            name: string(),
+            pro: boolean()
+        })),
     })),
-    next_page: string()
+    next_page: nullable(string()),
 })
 
 // エラーハンドリングをする
 // valibotで型をつける
 export const fetchZennArticles = async (authorId: string) => {
-  const res = await fetch(`https://zenn.dev/api/articles?username=${authorId}&order=latest`)
-  const data = await res.json()
-  return data
+    try {
+        const res = await fetch(`/api/articles?username=${authorId}&order=latest`)
+        const json = await res.json()
+        const result = safeParse(AritcleSchema, json)
+        if (result.success) {
+            return result.output
+          } else {
+            console.log(result.issues)
+          }
+    } catch (err) {
+        console.error(err)
+    }
 }
