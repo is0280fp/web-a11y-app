@@ -1,4 +1,4 @@
-import {object, optional, nullable, array, number, string, boolean, safeParse} from 'valibot'
+import {object, optional, nullable, array, number, string, boolean} from 'zod'
 
 const AritcleSchema = object({
     articles: array(object({
@@ -41,11 +41,11 @@ export const fetchZennArticles = async (authorId: string) => {
     try {
         const res = await fetch(`/api/articles?username=${authorId}&order=latest`)
         const json = await res.json()
-        const result = safeParse(AritcleSchema, json)
+        const result = AritcleSchema.safeParse(json)
         if (result.success) {
-            return result.output
+            return result.data
           } else {
-            console.log(result.issues)
+            console.log(result.error)
           }
     } catch (err) {
         console.error(err)
