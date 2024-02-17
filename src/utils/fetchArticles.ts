@@ -44,10 +44,8 @@ export const fetchZennArticles = async (authorId: string) => {
         const result = AritcleSchema.safeParse(json)
         if (result.success) {
             return result.data
-          } else {
-            console.log(result.error)
-          }
-    } catch (err) {
-        console.error(err)
+        }
+    } catch (e) {
+        console.error(e)
     }
 }
