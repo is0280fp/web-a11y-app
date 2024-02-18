@@ -21,7 +21,7 @@ const AritcleSchema = object({
             id: number(),
             username: string(),
             name: string(),
-            avarar_small_url: optional(string())
+            avatar_small_url: optional(string())
         }),
         publication: nullable(object({
             id: number(),
