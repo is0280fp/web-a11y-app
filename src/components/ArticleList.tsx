@@ -1,6 +1,6 @@
 import authors from "../authors.json";
 import { fetchZennArticles } from "../api/fetchArticles";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import timeSince from "../utils/timeSince";
 import { ClipboardDocumentIcon, CheckIcon, HeartIcon } from "@heroicons/react/20/solid";
 
@@ -18,12 +18,16 @@ export default function ArticleList() {
   );
 }
 
-const copyToClipboard = async (copyTarget: string) => {
+const copyToClipboard = async (copyTarget: string, articleId: number, setCopiedState: { (value: SetStateAction<{[key: number]: boolean}>): void; }) => {
   try {
     await navigator.clipboard.writeText(copyTarget);
-    console.log("Text copied to clipboard");
+    setCopiedState((prevState)=> ({...prevState, [articleId]: true}))
+    const timeout = setTimeout(() => {
+        setCopiedState((prevState)=> ({...prevState, [articleId]: false}))
+      }, 2000);
+    return () => clearTimeout(timeout)
   } catch (error) {
-    console.error("Failed to copy text: ", error);
+    console.error("Failed to copy text: ", error)
   }
 };
 
@@ -40,6 +44,7 @@ type Article = {
 // titleなどを表示するコンポーネント
 const ArticleListCard = (props: { authorId: string }) => {
   const [articles, setArticles] = useState<Article[] | undefined>([]);
+  const [copiedState, setCopiedState] = useState<{[key: number]: boolean}>({});
   useEffect(() => {
     const dataFetch = async () => {
       const articleData = await fetchZennArticles(props.authorId);
@@ -82,16 +87,17 @@ const ArticleListCard = (props: { authorId: string }) => {
               >
                 {article.title}
               </a>
-              <div className="flex flex-row gap-1 items-center">
-                <HeartIcon className="h-6 w-6" />
-                <div className="mt-1 text-sm text-gray-500">{article.liked_count}</div>
+              <div className="flex flex-row justify-between">
+                <div className="flex flex-row gap-1 items-center">
+                    <HeartIcon className="h-6 w-6" />
+                    <div className="mt-1 text-sm text-gray-500">{article.liked_count}</div>
+                </div>
+                <button onClick={() => copyToClipboard(`https://zenn.dev${article.path}`, article.id, setCopiedState)}>
+                    <div>
+                    {copiedState[article.id] ? <CheckIcon className="h-6 w-6" /> : <ClipboardDocumentIcon className="h-6 w-6" />}
+                    </div>
+                </button>
               </div>
-              <button onClick={() => copyToClipboard(`https://zenn.dev${article.path}`)}>
-                <p>copy</p>
-                <ClipboardDocumentIcon className="h-6 w-6" />
-                <p>copied</p>
-                <CheckIcon className="h-6 w-6" />
-              </button>
             </div>
           </div>
         );
