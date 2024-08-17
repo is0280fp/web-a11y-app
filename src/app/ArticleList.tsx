@@ -3,6 +3,7 @@ import { fetchZennArticles } from "../api/fetchArticles";
 import { SetStateAction, useEffect, useState } from "react";
 import timeSince from "../utils/timeSince";
 import { ClipboardDocumentIcon, CheckIcon, HeartIcon } from "@heroicons/react/20/solid";
+import Tooltip from "../components/tooltip";
 
 export default function ArticleList() {
   return (
@@ -94,6 +95,7 @@ const ArticleListCard = (props: { authorId: string }) => {
                 </div>
                 <button onClick={() => copyToClipboard(`https://zenn.dev${article.path}`, article.id, setCopiedState)}>
                     <div>
+                    {copiedState[article.id] && <Tooltip message={"Copied"}></Tooltip>}
                     {copiedState[article.id] ? <CheckIcon className="h-6 w-6" /> : <ClipboardDocumentIcon className="h-6 w-6" />}
                     </div>
                 </button>
