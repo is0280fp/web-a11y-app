@@ -2,19 +2,18 @@ import authors from "../authors.json";
 import { fetchZennArticles } from "../api/fetchArticles";
 import { SetStateAction, useEffect, useState } from "react";
 import timeSince from "../utils/timeSince";
+import dayjs from "dayjs";
 import { ClipboardDocumentIcon, CheckIcon, HeartIcon } from "@heroicons/react/20/solid";
 import Tooltip from "../components/tooltip";
 
 export default function ArticleList() {
   return (
     <>
-      <div className="container mx-auto px-5">
         <div className="flex flex-col gap-4">
           {authors.map((author) => {
             return <ArticleListCard authorId={author.authorId} key={author.authorId} />;
           })}
         </div>
-      </div>
     </>
   );
 }
@@ -60,7 +59,11 @@ const ArticleListCard = (props: { authorId: string }) => {
           liked_count: article.liked_count,
         };
       });
-      setArticles(filteredArticleData);
+      // DESC by number of liked_count
+      // const orderedFilteredArticleData = filteredArticleData?.sort((a, b) => b.liked_count - a.liked_count)
+      // ASC by number of published_at
+      const orderedFilteredArticleData = filteredArticleData?.sort((a, b) => dayjs(b.published_at).isAfter(a.published_at) ? -1 : 1)
+      setArticles(orderedFilteredArticleData);
     };
     dataFetch();
   }, []);
